@@ -1,0 +1,266 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #121212; /* Koyu tema arka plan */
+    color: #e0e0e0; /* Açık gri metin */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#app-container {
+    width: 90%;
+    max-width: 420px; /* Mobil uyumlu genişlik */
+    padding: 20px 0;
+}
+
+/* YENİ: Ana İlerleme Çubuğu CSS'i */
+#workout-progress-container {
+    margin-bottom: 20px;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #9e9e9e;
+    margin-bottom: 8px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background-color: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #3498db;
+    width: 0%;
+    transition: width 0.4s ease-out;
+    border-radius: 4px;
+}
+
+/* Kart Tasarımı (Koyu Tema) */
+.card {
+    background: #1e1e1e;
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    margin-bottom: 20px;
+    transition: opacity 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#exercise-name {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+#exercise-desc {
+    font-size: 1rem;
+    color: #aaaaaa;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.target-box {
+    background: #2c3e50;
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 1.2rem;
+    color: #64b5f6;
+    border: 1px solid #34495e;
+}
+
+/* Navigasyon ve Butonlar */
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary { background-color: #3498db; color: white; }
+.btn-secondary { background-color: #424242; color: white; }
+
+.action-area {
+    margin-top: 25px;
+    min-height: 60px;
+    text-align: center; /* Her şeyi tam ortalar */
+}
+
+/* YENİ: Süre Animasyonları ve Süre Barı */
+.timer-display {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease-out;
+    text-align: center;
+}
+
+/* Son saniyelerde devreye giren nabız animasyonu */
+@keyframes pulseFast {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.8; color: #ff5252; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.pulse-animation {
+    animation: pulseFast 0.5s infinite;
+}
+
+.timer-track {
+    width: 100%;
+    height: 6px;
+    background-color: #333;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.timer-fill {
+    height: 100%;
+    background-color: #e74c3c;
+    width: 100%;
+    transition: width 1s linear; /* Saniye saniye pürüzsüz azalma */
+}
+
+.btn-action {
+    width: 100%;
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-start {
+    width: 100%;
+    background-color: #f39c12;
+    color: white;
+}
+
+/* Özet Ekranı */
+.summary-section {
+    margin-top: 20px;
+    text-align: left;
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 4px solid #3498db;
+}
+
+#level-up-section {
+    border-left: 4px solid #f1c40f;
+}
+
+.summary-section h3 {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.summary-section ul { list-style-type: none; }
+.summary-section ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #444;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+}
+.summary-section ul li:last-child { border-bottom: none; }
+.summary-section ul li::before { content: "✔️"; margin-right: 10px; font-size: 0.9rem; }
+#level-up-section ul li::before { content: "⭐"; }
+
+/* YENİ: Sol Üst Buton, Yükleme Ekranı ve Modallar */
+
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    color: #3498db;
+}
+
+.btn-floating {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #2c3e50;
+    color: white;
+    border: 1px solid #34495e;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    transition: all 0.2s ease;
+}
+
+.btn-floating:hover { background-color: #34495e; }
+.btn-floating:active { transform: scale(0.95); }
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+    margin: 0;
+    position: relative;
+    transform: translateY(20px);
+    animation: slideUp 0.3s forwards;
+}
+
+@keyframes slideUp {
+    to { transform: translateY(0); }
+}

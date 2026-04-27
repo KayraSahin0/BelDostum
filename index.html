@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bel Dostum</title>
+    <link rel="icon" type="image/png" href="images/Logo.png">
+    <link rel="apple-touch-icon" href="images/Logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="btn-stats" class="btn-floating" style="display: none;">📊 İstatistikler</button>
+
+    <div id="loading-screen" class="loading-overlay">
+        <h2>Veriler Yükleniyor...</h2>
+    </div>
+
+    <div id="login-screen" class="loading-overlay" style="display: none;">
+    <div class="card" style="text-align: center;">
+        <h2>Hoş Geldin</h2>
+        <p>Devam etmek için giriş yapmalısın.</p>
+        <button id="btn-login" class="btn btn-primary" style="margin-top: 20px;">Google ile Giriş Yap</button>
+    </div>
+</div>
+
+    <div id="app-container">
+        
+        <div id="workout-progress-container">
+            <div class="progress-header">
+                <span>Antrenman İlerlemesi</span>
+                <span id="progress-text">1 / 7</span>
+            </div>
+            <div class="progress-track">
+                <div id="main-progress-bar" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="exercise-card" class="card">
+            <h2 id="exercise-name">Egzersiz Adı</h2>
+            <p id="exercise-desc">Açıklama burada yer alacak.</p>
+            <div class="target-box">
+                <span id="exercise-target-label">Hedef:</span>
+                <strong id="exercise-target-value">--</strong>
+            </div>
+            
+            <div id="action-area" class="action-area"></div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button id="btn-prev" class="btn btn-secondary">Önceki</button>
+            <button id="btn-next" class="btn btn-primary">Sonraki</button>
+        </div>
+
+        <div id="summary-card" class="card" style="display: none;">
+            <h2>🎉 Antrenman Tamamlandı!</h2>
+            <p>Harika bir iş çıkardın. Bel sağlığın için bugünkü yatırımını tamamladın.</p>
+            
+            <div class="summary-section">
+                <h3>Tamamlanan Egzersizler</h3>
+                <ul id="summary-completed-list"></ul>
+            </div>
+
+            <div class="summary-section" id="level-up-section" style="display: none;">
+                <h3>🚀 Seviye Atlayanlar!</h3>
+                <ul id="summary-leveled-up-list"></ul>
+            </div>
+
+            <button id="btn-restart" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Yeni Antrenmana Başla</button>
+        </div>
+
+        <div id="stats-modal" class="modal-overlay">
+        <div class="modal-content card">
+            <h2>📊 İstatistiklerin</h2>
+            <div class="target-box" style="margin-bottom: 15px;">
+                <span>Bu Ay Yapılan Antrenman:</span>
+                <strong id="stat-month-count">0</strong>
+            </div>
+            <div class="summary-section">
+                <h3>⭐ Bugüne Kadar Seviye Atlayanlar</h3>
+                <ul id="stat-leveled-up-list">
+                    <li>Henüz seviye atlayan hareket yok.</li>
+                </ul>
+            </div>
+            <button id="btn-close-stats" class="btn btn-secondary" style="margin-top: 20px; width: 100%;">Kapat</button>
+        </div>
+    </div>
+
+    <div id="levelup-modal" class="modal-overlay">
+        <div class="modal-content card">
+            <h2>Seviye Atlama Zamanı! 🚀</h2>
+            <p>Bu hareketi 3 kez başarıyla tamamladın. Ancak bel sağlığın için kontrollü gitmeliyiz.</p>
+            <div class="target-box" style="margin: 15px 0;">
+                <strong style="color: #e74c3c;">Bu harekette zorlanıyor musunuz? Yükseltme mümkün.</strong>
+            </div>
+            <div class="nav-buttons">
+                <button id="btn-levelup-yes" class="btn btn-secondary">Evet, Zorlanıyorum</button>
+                <button id="btn-levelup-no" class="btn btn-action">Hayır, Yükselt!</button>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
