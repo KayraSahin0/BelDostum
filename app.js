@@ -1,4 +1,6 @@
-// --- YENİ: FIREBASE KÜTÜPHANELERİ (ES MODULE) ---
+// ==========================================
+// 1. FIREBASE KÜTÜPHANELERİ (ES MODULE) VE AYARLAR
+// ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
@@ -6,19 +8,21 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from
 // !!! KENDİ FIREBASE YAPILANDIRMANI BURAYA GİR !!!
 const firebaseConfig = {
     apiKey: "AIzaSyBdcbY5tq3fgT8gte5REOgqgY9Euwpf0VM",
-  authDomain: "beldostum-b4a12.firebaseapp.com",
-  projectId: "beldostum-b4a12",
-  storageBucket: "beldostum-b4a12.firebasestorage.app",
-  messagingSenderId: "447140624771",
-  appId: "1:447140624771:web:c2ab9e8bed4a8845409eb6",
-  measurementId: "G-HGS52HMPJP"
+    authDomain: "beldostum-b4a12.firebaseapp.com",
+    projectId: "beldostum-b4a12",
+    storageBucket: "beldostum-b4a12.firebasestorage.app",
+    messagingSenderId: "447140624771",
+    appId: "1:447140624771:web:c2ab9e8bed4a8845409eb6",
+    measurementId: "G-HGS52HMPJP"
 };
 
 // Firebase Başlatma
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// Veritabanı Döküman Referansı (Şimdilik tek kullanıcılı global bir alan kullanıyoruz)
+// Veritabanı Döküman Referansı (Global veri alanı)
 const userDocRef = doc(db, "workoutApp", "userData");
 
 // Bellekte tutacağımız güncel veriler
@@ -27,26 +31,96 @@ let dbData = {
     stats: { workoutsThisMonth: 0, currentMonth: "", leveledUpExercises: [] }
 };
 
-// ==========================================
-// EGZERSİZ VERİLERİ VE DEĞİŞKENLER
-// ==========================================
-const exercises = [
-    { id: 1, isim: "Bird-Dog", tip: "tekrar", varsayilanHedef: 10, aciklama: "Eller ve dizler üzerinde dururken, sağ kolu ve sol bacağı aynı anda yere paralel uzatın. Sırtın düzlüğünü koruyun." },
-    { id: 2, isim: "Kalça Köprüsü / Glute Bridge", tip: "tekrar", varsayilanHedef: 12, aciklama: "Sırtüstü yatın, dizleri bükün. Bel kavisini bozmadan kalçanızı sıkarak yukarı kaldırın." },
-    { id: 3, isim: "McGill Yarım Mekik", tip: "tekrar", varsayilanHedef: 8, aciklama: "Sırtüstü yatın. Bir bacak düz, diğeri bükülü. Ellerinizi bel boşluğunuza yerleştirin ve sadece baş/omuzlarınızı hafifçe kaldırın." },
-    { id: 4, isim: "Yarım Plank - Dizler Üzerinde", tip: "sure", varsayilanHedef: 20, aciklama: "Dirsekler ve dizler üzerinde durun. Karın ve kalça kaslarınızı sıkarak gövdenizi düz bir çizgide tutun." },
-    { id: 5, isim: "Duvar Şınavı", tip: "tekrar", varsayilanHedef: 10, aciklama: "Duvara bir kol mesafesinde durun, ellerinizi omuz genişliğinde duvara dayayarak kontrollü şınav çekin." },
-    { id: 6, isim: "Sandalye Dips", tip: "tekrar", varsayilanHedef: 8, aciklama: "Sabit bir sandalyenin ucuna oturun, ellerle destek alarak kalçanızı sandalyeden ayırın ve kolları bükerek aşağı inin." },
-    { id: 7, isim: "İzometrik Biceps Sıkıştırma", tip: "sure", varsayilanHedef: 15, aciklama: "Bir elinizle diğer bileğinizi tutup yukarı doğru çekerken, diğer elinizle aşağı doğru direnç uygulayın." }
-];
 
+// ==========================================
+// 2. ÇOKLU PROGRAM VERİTABANI
+// ==========================================
+const workoutPrograms = {
+    "itis": {
+        name: "İtiş Günü",
+        exercises: [
+            { id: "incline_pushup", isim: "Eğimli Şınav", tip: "tekrar", varsayilanHedef: 10, aciklama: "Masa veya yatak kenarında. Göğüs (Chest)." },
+            { id: "triceps_dips", isim: "Sandalye Dips", tip: "tekrar", varsayilanHedef: 10, aciklama: "Arka Kol / Üst Kol Arkası (Triceps)." },
+            { id: "iso_shoulder_press", isim: "İzometrik Omuz İtişi", tip: "sure", varsayilanHedef: 15, aciklama: "Kapı pervazına kollarını iki yandan bastırarak." },
+            { id: "wall_angels", isim: "Duvar Melekleri", tip: "tekrar", varsayilanHedef: 10, aciklama: "Arka Omuz ve Postür." },
+            { id: "mcgill_curlup", isim: "McGill Yarım Mekik", tip: "tekrar", varsayilanHedef: 10, aciklama: "Klasik mekik yerine fıtık dostu versiyon." },
+            { id: "plank", isim: "Plank (Yarım veya Tam)", tip: "sure", varsayilanHedef: 20, aciklama: "Tüm Merkez Bölge (Core)." },
+            { id: "bird_dog", isim: "Kuş-Köpek (Bird-Dog)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Bel ve Omurga Destek Kasları." },
+            { id: "glute_bridge", isim: "Kalça Köprüsü (Glute Bridge)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Kalça ve Alt Bel." }
+        ]
+    },
+    "alt_vucut": {
+        name: "Alt Vücut Günü",
+        exercises: [
+            { id: "box_squat", isim: "Sandalye Squat", tip: "tekrar", varsayilanHedef: 12, aciklama: "Üst Bacak (Quads)." },
+            { id: "reverse_lunge", isim: "Ters Adım (Reverse Lunge)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Her bacak için 5 tekrar. Tüm Bacak ve Kalça." },
+            { id: "clamshells", isim: "İstiridye (Clamshells)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Yan Kalça (Gluteus Medius)." },
+            { id: "calf_raises", isim: "Parmak Ucu Yükselme", tip: "tekrar", varsayilanHedef: 15, aciklama: "Ayakta durup parmak ucuna yükselme. Baldır (Calves)." },
+            { id: "dead_bug", isim: "Ölü Böcek (Dead Bug)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Alt Karın (Lower Abs)." },
+            { id: "plank", isim: "Plank (Yarım veya Tam)", tip: "sure", varsayilanHedef: 20, aciklama: "Tüm Merkez Bölge (Core)." },
+            { id: "bird_dog", isim: "Kuş-Köpek (Bird-Dog)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Bel ve Omurga Destek Kasları." },
+            { id: "glute_bridge", isim: "Kalça Köprüsü (Glute Bridge)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Kalça ve Alt Bel." }
+        ]
+    },
+    "cekis": {
+        name: "Çekiş Günü",
+        exercises: [
+            { id: "towel_pullapart", isim: "Havlu Çekme", tip: "tekrar", varsayilanHedef: 12, aciklama: "Havluyu iki yandan yırtacakmış gibi çekip göğse getirme. Sırt (Back)." },
+            { id: "prone_towel_pulldown", isim: "Yüzüstü Havlu Kaydırma", tip: "tekrar", varsayilanHedef: 10, aciklama: "Yüzüstü yatıp ellerindeki havluyu ensene doğru çekme. Kanat (Lats)." },
+            { id: "leg_bicep_curl", isim: "Bacağa Karşı Pazı Bükme", tip: "tekrar", varsayilanHedef: 10, aciklama: "Kendi bacağına direnç uygulayarak. Ön Kol (Biceps)." },
+            { id: "towel_wring", isim: "Havlu Sıkma", tip: "sure", varsayilanHedef: 15, aciklama: "Kalın bir havluyu suyunu sıkarmış gibi var gücünle ters yönlere çevirip bekleme." },
+            { id: "reverse_snow_angel", isim: "Ters Kar Meleği", tip: "tekrar", varsayilanHedef: 10, aciklama: "Kürek Kemikleri ve Sırt." },
+            { id: "plank", isim: "Plank (Yarım veya Tam)", tip: "sure", varsayilanHedef: 20, aciklama: "Tüm Merkez Bölge (Core)." },
+            { id: "bird_dog", isim: "Kuş-Köpek (Bird-Dog)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Bel ve Omurga Destek Kasları." },
+            { id: "glute_bridge", isim: "Kalça Köprüsü (Glute Bridge)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Kalça ve Alt Bel." }
+        ]
+    },
+    "kondisyon": {
+        name: "Kondisyon Günü",
+        exercises: [
+            { id: "wide_wall_pushup", isim: "Geniş Tutuş Duvar Şınavı", tip: "tekrar", varsayilanHedef: 12, aciklama: "Dış Göğüs (Outer Chest)." },
+            { id: "wall_sit", isim: "Duvar Oturuşu", tip: "sure", varsayilanHedef: 30, aciklama: "Bacak (Legs)." },
+            { id: "side_plank", isim: "Yan Plank", tip: "sure", varsayilanHedef: 15, aciklama: "Sağ ve Sol. Yan Karın (Obliques)." },
+            { id: "bear_hold", isim: "Ayı Duruşu", tip: "sure", varsayilanHedef: 20, aciklama: "Tüm Core, Omuz ve Bacak." },
+            { id: "iso_front_raise", isim: "İzometrik Ön Omuz", tip: "sure", varsayilanHedef: 15, aciklama: "Yumruklarını duvara önden bastırarak direnç uygulama." },
+            { id: "plank", isim: "Plank (Yarım veya Tam)", tip: "sure", varsayilanHedef: 20, aciklama: "Tüm Merkez Bölge (Core)." },
+            { id: "bird_dog", isim: "Kuş-Köpek (Bird-Dog)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Bel ve Omurga Destek Kasları." },
+            { id: "glute_bridge", isim: "Kalça Köprüsü (Glute Bridge)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Kalça ve Alt Bel." }
+        ]
+    },
+    "full_body": {
+        name: "Full Body",
+        exercises: [
+            { id: "incline_pushup", isim: "Eğimli Şınav", tip: "tekrar", varsayilanHedef: 10, aciklama: "Göğüs ve Arka Kol." },
+            { id: "box_squat", isim: "Sandalye Squat", tip: "tekrar", varsayilanHedef: 12, aciklama: "Bacak ve Kalça." },
+            { id: "leg_bicep_curl", isim: "Bacağa Karşı Pazı Bükme", tip: "tekrar", varsayilanHedef: 10, aciklama: "Ön Kol (Biceps)." },
+            { id: "towel_pullapart", isim: "Havlu Çekme", tip: "tekrar", varsayilanHedef: 12, aciklama: "Sırt ve Kanat." },
+            { id: "triceps_dips", isim: "Sandalye Dips", tip: "tekrar", varsayilanHedef: 10, aciklama: "Arka Kol (Triceps)." },
+            { id: "plank", isim: "Plank (Yarım veya Tam)", tip: "sure", varsayilanHedef: 30, aciklama: "Tüm Merkez Bölge (Core)." },
+            { id: "bird_dog", isim: "Kuş-Köpek (Bird-Dog)", tip: "tekrar", varsayilanHedef: 10, aciklama: "Bel ve Omurga Destek Kasları." },
+            { id: "glute_bridge", isim: "Kalça Köprüsü (Glute Bridge)", tip: "tekrar", varsayilanHedef: 12, aciklama: "Kalça ve Alt Bel." }
+        ]
+    }
+};
+
+// ==========================================
+// 3. DEĞİŞKENLER VE DOM SEÇİCİLER
+// ==========================================
+let activeExercises = []; 
 let currentIndex = 0;
 let timerInterval = null;
 let sessionCompleted = [];
 let sessionLeveledUp = [];
-let pendingLevelUpExercise = null; // Modaldan dönen cevabı bekleyen egzersiz
+let pendingLevelUpExercise = null;
 
-// DOM Seçicileri
+const loginScreen = document.getElementById('login-screen');
+const loadingScreen = document.getElementById('loading-screen');
+const programSelectionScreen = document.getElementById('program-selection-screen');
+const appContainer = document.getElementById('app-container');
+
+const btnLogin = document.getElementById('btn-login');
+const btnPrograms = document.querySelectorAll('.btn-program');
+
 const elName = document.getElementById('exercise-name');
 const elDesc = document.getElementById('exercise-desc');
 const elTarget = document.getElementById('exercise-target-value');
@@ -66,7 +140,6 @@ const listLeveledUp = document.getElementById('summary-leveled-up-list');
 const levelUpSection = document.getElementById('level-up-section');
 const btnRestart = document.getElementById('btn-restart');
 
-// Yeni Modallar ve Butonlar
 const btnStats = document.getElementById('btn-stats');
 const statsModal = document.getElementById('stats-modal');
 const btnCloseStats = document.getElementById('btn-close-stats');
@@ -77,63 +150,55 @@ const levelUpModal = document.getElementById('levelup-modal');
 const btnLevelupYes = document.getElementById('btn-levelup-yes');
 const btnLevelupNo = document.getElementById('btn-levelup-no');
 
-const loadingScreen = document.getElementById('loading-screen');
-const appContainer = document.getElementById('app-container');
+const programConfirmModal = document.getElementById('program-confirm-modal');
+const confirmProgramTitle = document.getElementById('confirm-program-title');
+const confirmExerciseList = document.getElementById('confirm-exercise-list');
+const btnConfirmYes = document.getElementById('btn-confirm-yes');
+const btnConfirmNo = document.getElementById('btn-confirm-no');
+let pendingProgramKey = null; 
 
-// Auth İşlemleri
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-// DOM Seçiciler
-const loginScreen = document.getElementById('login-screen');
-const btnLogin = document.getElementById('btn-login');
-
-// Giriş Butonu Olayı
+// ==========================================
+// 4. AUTH (GİRİŞ) VE FİREBASE VERİ İŞLEMLERİ
+// ==========================================
 btnLogin.addEventListener('click', () => {
     signInWithPopup(auth, provider).catch(error => console.error("Giriş hatası:", error));
 });
 
-// Oturum Durumunu Dinle (Uygulamanın ana giriş noktası burası olmalı)
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Kullanıcı giriş yaptıysa:
         loginScreen.style.display = 'none';
-        loadDataFromFirebase(); // Mevcut fonksiyonun
+        loadDataFromFirebase();
     } else {
-        // Kullanıcı giriş yapmadıysa:
         loadingScreen.style.display = 'none';
         appContainer.style.display = 'none';
+        programSelectionScreen.style.display = 'none';
         loginScreen.style.display = 'flex';
     }
 });
 
-// ==========================================
-// FİREBASE VERİ İŞLEMLERİ
-// ==========================================
 async function loadDataFromFirebase() {
     try {
+        loadingScreen.style.display = 'flex';
         const docSnap = await getDoc(userDocRef);
         if (docSnap.exists()) {
             dbData = docSnap.data();
         } else {
-            // İlk kez giriyorsa yapıyı oluştur
             await setDoc(userDocRef, dbData);
         }
         
-        // Ay kontrolü (Eğer yeni bir aya geçildiyse sayacı sıfırla)
-        const currentMonthStr = new Date().toISOString().slice(0, 7); // Örn: "2026-04"
+        const currentMonthStr = new Date().toISOString().slice(0, 7);
         if (dbData.stats.currentMonth !== currentMonthStr) {
             dbData.stats.currentMonth = currentMonthStr;
             dbData.stats.workoutsThisMonth = 0;
             saveDataToFirebase();
         }
 
-        // Yükleme ekranını kapat, uygulamayı aç
         loadingScreen.style.display = 'none';
-        appContainer.style.display = 'block';
+        appContainer.style.display = 'none'; 
+        programSelectionScreen.style.display = 'block';
         btnStats.style.display = 'block';
         
-        renderExercise();
     } catch (error) {
         console.error("Firebase'den veri çekilirken hata:", error);
         loadingScreen.innerHTML = "<h2>Veri çekilemedi. Lütfen bağlantınızı kontrol edin.</h2>";
@@ -148,63 +213,116 @@ async function saveDataToFirebase() {
     }
 }
 
+
 // ==========================================
-// GELİŞİM MANTIĞI VE MODALLAR
+// 5. PROGRAM SEÇİMİ VE GELİŞİM MANTIĞI
 // ==========================================
+function switchScreen(hideElement, showElement, callback) {
+    hideElement.classList.add('fade-out');
+    
+    setTimeout(() => {
+        hideElement.style.display = 'none';
+        hideElement.classList.remove('fade-out');
+        
+        showElement.style.display = 'block';
+        showElement.classList.add('fade-in');
+        
+        if(callback) callback();
+        
+        setTimeout(() => {
+            showElement.classList.remove('fade-in');
+        }, 300);
+    }, 300); 
+}
+
+btnPrograms.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        pendingProgramKey = btn.getAttribute('data-program');
+        
+        const prog = workoutPrograms[pendingProgramKey];
+        confirmProgramTitle.textContent = prog.name;
+        confirmExerciseList.innerHTML = ''; 
+        
+        prog.exercises.forEach(ex => {
+            const li = document.createElement('li');
+            li.textContent = ex.isim;
+            confirmExerciseList.appendChild(li);
+        });
+        
+        programConfirmModal.style.display = 'flex';
+    });
+});
+
+btnConfirmNo.addEventListener('click', () => {
+    programConfirmModal.style.display = 'none';
+    pendingProgramKey = null;
+});
+
+btnConfirmYes.addEventListener('click', () => {
+    programConfirmModal.style.display = 'none';
+    if(pendingProgramKey) {
+        startProgram(pendingProgramKey);
+    }
+});
+
+function startProgram(programKey) {
+    activeExercises = workoutPrograms[programKey].exercises;
+    currentIndex = 0;
+    sessionCompleted = [];
+    sessionLeveledUp = [];
+    
+    switchScreen(programSelectionScreen, appContainer, () => {
+        renderExercise();
+    });
+}
+
 function getCurrentTarget(exercise) {
     return dbData.progress[exercise.id] ? dbData.progress[exercise.id].currentTarget : exercise.varsayilanHedef;
 }
 
 function updateProgressBar() {
-    const total = exercises.length;
+    const total = activeExercises.length;
     const current = currentIndex + 1;
     elProgressText.textContent = `${current} / ${total}`;
     elMainProgressBar.style.width = `${(current / total) * 100}%`;
 }
 
 function handleCompletion() {
-    const currentEx = exercises[currentIndex];
+    const currentEx = activeExercises[currentIndex];
     
     if (!dbData.progress[currentEx.id]) {
         dbData.progress[currentEx.id] = { streak: 0, currentTarget: currentEx.varsayilanHedef };
     }
 
-    // 1. Önce seriyi artır
     dbData.progress[currentEx.id].streak += 1;
 
-    // 2. Eğer seri 3 olduysa Modal'ı aç ve işlemi beklet
     if (dbData.progress[currentEx.id].streak >= 3) {
         pendingLevelUpExercise = currentEx;
         levelUpModal.style.display = 'flex';
-        return; // İşlem burada kesilir, modal butonlarına tıklanması beklenir
+        return; 
     }
 
-    // Eğer seviye atlama yoksa standart tamamlanma sürecine devam et
     finishExerciseProcess(currentEx, false);
 }
 
-// Modal: "Evet, Zorlanıyorum" (Seviye Atlatma, Seriyi Sıfırla)
 btnLevelupYes.addEventListener('click', () => {
     levelUpModal.style.display = 'none';
-    dbData.progress[pendingLevelUpExercise.id].streak = 0; // Seriyi sıfırla
+    dbData.progress[pendingLevelUpExercise.id].streak = 0; 
     finishExerciseProcess(pendingLevelUpExercise, false);
 });
 
-// Modal: "Hayır, Zorlanmıyorum" (Yükselt!)
 btnLevelupNo.addEventListener('click', () => {
     levelUpModal.style.display = 'none';
     const currentEx = pendingLevelUpExercise;
     
-    // Hedefi artır
     if (currentEx.tip === 'sure') {
         dbData.progress[currentEx.id].currentTarget += 5; 
     } else {
         dbData.progress[currentEx.id].currentTarget += 2; 
     }
     
-    dbData.progress[currentEx.id].streak = 0; // Seriyi sıfırla
+    dbData.progress[currentEx.id].streak = 0; 
 
-    // Global istatistiklere ekle (Eğer daha önce eklenmediyse)
     if (!dbData.stats.leveledUpExercises.includes(currentEx.isim)) {
         dbData.stats.leveledUpExercises.push(currentEx.isim);
     }
@@ -222,23 +340,81 @@ function finishExerciseProcess(currentEx, leveledUp) {
         sessionLeveledUp.push(currentEx.isim);
     }
 
-    if (currentIndex === exercises.length - 1) {
+    if (currentIndex === activeExercises.length - 1) {
         showSummary();
     } else {
-        currentIndex++;
-        renderExercise();
+        showRestUI(); // YENİ: Direkt render yerine molaya geç
     }
 }
 
+
 // ==========================================
-// ARAYÜZ (UI) FONKSİYONLARI
+// 6. ARAYÜZ (UI) FONKSİYONLARI VE MOLA
 // ==========================================
+
+// YENİ: Dinlenme Molası Ekranı
+function showRestUI() {
+    let restTime = 10;
+    
+    card.style.opacity = 0;
+    clearInterval(timerInterval); 
+    
+    setTimeout(() => {
+        elName.textContent = "Dinlenme Molası ☕";
+        elDesc.textContent = "Sıradaki Hareket: " + activeExercises[currentIndex + 1].isim;
+        elTarget.textContent = "--";
+        
+        actionArea.innerHTML = `
+            <div id="rest-timer-display" class="timer-display">${restTime}</div>
+            <div class="nav-buttons" style="margin-top: 15px; gap: 10px;">
+                <button id="btn-add-time" class="btn btn-secondary">+10 Saniye</button>
+                <button id="btn-skip-rest" class="btn btn-action">Molayı Atla</button>
+            </div>
+        `;
+
+        const restTimerDisplay = document.getElementById('rest-timer-display');
+        const btnAddTime = document.getElementById('btn-add-time');
+        const btnSkipRest = document.getElementById('btn-skip-rest');
+
+        // Mola sırasında kafa karışmasın diye alttaki ileri/geri butonlarını gizleyelim veya pasif yapalım
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+        
+        card.style.opacity = 1;
+
+        timerInterval = setInterval(() => {
+            restTime--;
+            restTimerDisplay.textContent = restTime;
+            
+            if (restTime <= 0) {
+                endRest();
+            }
+        }, 1000);
+
+        btnAddTime.addEventListener('click', () => {
+            restTime += 10;
+            restTimerDisplay.textContent = restTime;
+        });
+
+        btnSkipRest.addEventListener('click', () => {
+            endRest();
+        });
+        
+    }, 150);
+}
+
+// YENİ: Mola Bitimi İşlemleri
+function endRest() {
+    clearInterval(timerInterval);
+    currentIndex++;
+    renderExercise();
+}
+
 function showSummary() {
     card.style.display = 'none';
     navButtons.style.display = 'none';
     progressContainer.style.display = 'none'; 
     
-    // Antrenman bittiğinde bu ayki sayacı 1 artır ve Firebase'e yaz
     dbData.stats.workoutsThisMonth += 1;
     saveDataToFirebase();
 
@@ -263,7 +439,7 @@ function showSummary() {
 }
 
 function renderExercise() {
-    const currentEx = exercises[currentIndex];
+    const currentEx = activeExercises[currentIndex];
     const currentTarget = getCurrentTarget(currentEx); 
     
     card.style.opacity = 0;
@@ -286,7 +462,7 @@ function renderExercise() {
     }, 150);
 
     btnPrev.disabled = currentIndex === 0;
-    btnNext.disabled = currentIndex === exercises.length - 1;
+    btnNext.disabled = currentIndex === activeExercises.length - 1;
 }
 
 function setupTimerUI(duration) {
@@ -343,11 +519,14 @@ function setupRepUI() {
     document.getElementById('btn-complete').addEventListener('click', handleCompletion);
 }
 
+
 // ==========================================
-// OLAY DİNLEYİCİLER (EVENT LISTENERS)
+// 7. GENEL OLAY DİNLEYİCİLERİ
 // ==========================================
+
 btnNext.addEventListener('click', () => {
-    if (currentIndex < exercises.length - 1) {
+    if (currentIndex < activeExercises.length - 1) {
+        // İleri butonuna manuel basılırsa molayı es geçip direkt sonrakine atlar
         currentIndex++;
         renderExercise();
     }
@@ -361,18 +540,15 @@ btnPrev.addEventListener('click', () => {
 });
 
 btnRestart.addEventListener('click', () => {
-    currentIndex = 0;
-    sessionCompleted = [];
-    sessionLeveledUp = [];
     summaryCard.style.display = 'none';
     levelUpSection.style.display = 'none';
     progressContainer.style.display = 'block'; 
     card.style.display = 'block';
     navButtons.style.display = 'flex';
-    renderExercise();
+    
+    switchScreen(appContainer, programSelectionScreen);
 });
 
-// İstatistik Modalı Aç/Kapat
 btnStats.addEventListener('click', () => {
     statMonthCount.textContent = dbData.stats.workoutsThisMonth;
     

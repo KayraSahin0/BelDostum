@@ -6,12 +6,15 @@
 }
 
 body {
-    background-color: #121212; /* Koyu tema arka plan */
-    color: #e0e0e0; /* Açık gri metin */
+    background-color: #121212;
+    color: #e0e0e0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    margin: 0;
+    padding: 20px;
 }
 
 #app-container {
@@ -263,4 +266,83 @@ body {
 
 @keyframes slideUp {
     to { transform: translateY(0); }
+}
+
+/* YENİ: Program Seçim Ekranı Stilleri */
+.program-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-program {
+    background-color: #1e1e1e;
+    color: #fff;
+    border: 2px solid #3498db;
+    padding: 20px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-program:hover {
+    background-color: #3498db;
+    transform: translateY(-2px);
+}
+
+.btn-program:active {
+    transform: scale(0.98);
+}
+
+#app-container, #program-selection-screen {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* YENİ: Onay Modalı Liste Tasarımı */
+.confirm-list {
+    text-align: left;
+    list-style-type: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto; /* Çok hareket varsa kaydırma çubuğu çıkar */
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.confirm-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #222;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+.confirm-list li::before { content: "🔹"; margin-right: 8px; font-size: 0.8rem; }
+.confirm-list li:last-child { border-bottom: none; }
+
+/* YENİ: Ekran Geçiş Animasyonları */
+.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* İstatistikler butonu ile başlığın çakışmasını engeller */
+#program-selection-screen h2 {
+    margin-top: 30px; 
 }

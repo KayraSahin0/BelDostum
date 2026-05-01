@@ -9,22 +9,40 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
+    <!-- İstatistik Butonu (Sol Üst) -->
     <button id="btn-stats" class="btn-floating" style="display: none;">📊 İstatistikler</button>
 
+    <!-- Yükleme Ekranı -->
     <div id="loading-screen" class="loading-overlay">
         <h2>Veriler Yükleniyor...</h2>
     </div>
 
+    <!-- Giriş Ekranı -->
     <div id="login-screen" class="loading-overlay" style="display: none;">
-    <div class="card" style="text-align: center;">
-        <h2>Hoş Geldin</h2>
-        <p>Devam etmek için giriş yapmalısın.</p>
-        <button id="btn-login" class="btn btn-primary" style="margin-top: 20px;">Google ile Giriş Yap</button>
+        <div class="card" style="text-align: center;">
+            <h2>Hoş Geldin</h2>
+            <p>Devam etmek için giriş yapmalısın.</p>
+            <button id="btn-login" class="btn btn-primary" style="margin-top: 20px;">Google ile Giriş Yap</button>
+        </div>
     </div>
-</div>
 
-    <div id="app-container">
+    <!-- Program Seçim Ekranı -->
+    <div id="program-selection-screen" style="display: none; width: 90%; max-width: 420px; margin: 20px auto;">
+        <h2 style="text-align: center; color: white; margin-bottom: 20px;">Antrenmanını Seç</h2>
+        <div class="program-grid">
+            <button class="btn-program" data-program="itis">💪 İtiş Günü</button>
+            <button class="btn-program" data-program="alt_vucut">🦵 Alt Vücut Günü</button>
+            <button class="btn-program" data-program="cekis">🔙 Çekiş Günü</button>
+            <button class="btn-program" data-program="kondisyon">🔥 Kondisyon Günü</button>
+            <button class="btn-program" data-program="full_body">🦍 Full Body</button>
+        </div>
+    </div>
+
+    <!-- ANA UYGULAMA ALANI (Antrenman başladığında görünür) -->
+    <div id="app-container" style="display: none;">
         
+        <!-- İlerleme Çubuğu -->
         <div id="workout-progress-container">
             <div class="progress-header">
                 <span>Antrenman İlerlemesi</span>
@@ -35,6 +53,7 @@
             </div>
         </div>
 
+        <!-- Egzersiz Kartı -->
         <div id="exercise-card" class="card">
             <h2 id="exercise-name">Egzersiz Adı</h2>
             <p id="exercise-desc">Açıklama burada yer alacak.</p>
@@ -46,11 +65,13 @@
             <div id="action-area" class="action-area"></div>
         </div>
         
+        <!-- Navigasyon Butonları -->
         <div class="nav-buttons">
             <button id="btn-prev" class="btn btn-secondary">Önceki</button>
             <button id="btn-next" class="btn btn-primary">Sonraki</button>
         </div>
 
+        <!-- Antrenman Özeti Kartı -->
         <div id="summary-card" class="card" style="display: none;">
             <h2>🎉 Antrenman Tamamlandı!</h2>
             <p>Harika bir iş çıkardın. Bel sağlığın için bugünkü yatırımını tamamladın.</p>
@@ -68,7 +89,15 @@
             <button id="btn-restart" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Yeni Antrenmana Başla</button>
         </div>
 
-        <div id="stats-modal" class="modal-overlay">
+    </div> <!-- app-container BURADA KAPANIYOR, MODALLAR DIŞARIDA KALACAK -->
+
+
+    <!-- ========================================== -->
+    <!-- MODALLAR (Açılır Pencereler) -->
+    <!-- ========================================== -->
+
+    <!-- 1. İstatistik Modalı -->
+    <div id="stats-modal" class="modal-overlay">
         <div class="modal-content card">
             <h2>📊 İstatistiklerin</h2>
             <div class="target-box" style="margin-bottom: 15px;">
@@ -85,6 +114,7 @@
         </div>
     </div>
 
+    <!-- 2. Seviye Atlama Modalı -->
     <div id="levelup-modal" class="modal-overlay">
         <div class="modal-content card">
             <h2>Seviye Atlama Zamanı! 🚀</h2>
@@ -99,8 +129,24 @@
         </div>
     </div>
 
+    <!-- 3. Antrenman Onay Modalı -->
+    <div id="program-confirm-modal" class="modal-overlay">
+        <div class="modal-content card">
+            <h2 id="confirm-program-title" style="color: #3498db; margin-bottom: 10px;">Antrenman Adı</h2>
+            <p style="color: #aaaaaa; margin-bottom: 15px;">Bu antrenmanda şunlar var, hazır mısın?</p>
+            
+            <ul id="confirm-exercise-list" class="confirm-list">
+                <!-- JS tarafından hareketler buraya sıralanacak -->
+            </ul>
+
+            <div class="nav-buttons" style="margin-top: 20px;">
+                <button id="btn-confirm-no" class="btn btn-secondary">Vazgeç</button>
+                <button id="btn-confirm-yes" class="btn btn-primary">Evet, Başla!</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Script Çağrısı -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
