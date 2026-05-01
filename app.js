@@ -28,12 +28,12 @@ const userDocRef = doc(db, "workoutApp", "userData");
 // Bellekte tutacağımız güncel veriler
 let dbData = {
     progress: {}, 
-    stats: { workoutsThisMonth: 0, currentMonth: "", leveledUpExercises: [] }
+    stats: { workoutsThisMonth: 0, currentMonth: "", leveledUpExercises: [], workoutDays: [] }
 };
 
 
 // ==========================================
-// 2. ÇOKLU PROGRAM VERİTABANI
+// 2. ÇOKLU PROGRAM VERİTABANI               
 // ==========================================
 const workoutPrograms = {
     "itis": {
@@ -157,6 +157,11 @@ const btnConfirmYes = document.getElementById('btn-confirm-yes');
 const btnConfirmNo = document.getElementById('btn-confirm-no');
 let pendingProgramKey = null; 
 
+const btnToggleCalendar = document.getElementById('btn-toggle-calendar');
+const calendarContainer = document.getElementById('calendar-container');
+const calendarGrid = document.getElementById('calendar-grid');
+const calendarMonthName = document.getElementById('calendar-month-name');
+
 
 // ==========================================
 // 4. AUTH (GİRİŞ) VE FİREBASE VERİ İŞLEMLERİ
@@ -187,10 +192,15 @@ async function loadDataFromFirebase() {
             await setDoc(userDocRef, dbData);
         }
         
+        // Veri yapısı eski versiyonsa güncelleyelim
+        if (!dbData.stats.workoutDays) dbData.stats.workoutDays = [];
+
+        // Yeni aya geçilmişse verileri sıfırla
         const currentMonthStr = new Date().toISOString().slice(0, 7);
         if (dbData.stats.currentMonth !== currentMonthStr) {
             dbData.stats.currentMonth = currentMonthStr;
             dbData.stats.workoutsThisMonth = 0;
+            dbData.stats.workoutDays = []; // YENİ: Yeni ayda takvimi sıfırla
             saveDataToFirebase();
         }
 
@@ -415,6 +425,13 @@ function showSummary() {
     navButtons.style.display = 'none';
     progressContainer.style.display = 'none'; 
     
+    // Antrenman bittiğinde bugünün gününü kaydet (Takvim için)
+    const today = new Date().getDate(); 
+    if (!dbData.stats.workoutDays) dbData.stats.workoutDays = [];
+    if (!dbData.stats.workoutDays.includes(today)) {
+        dbData.stats.workoutDays.push(today);
+    }
+
     dbData.stats.workoutsThisMonth += 1;
     saveDataToFirebase();
 
@@ -521,12 +538,63 @@ function setupRepUI() {
 
 
 // ==========================================
-// 7. GENEL OLAY DİNLEYİCİLERİ
+// 7. TAKVİM OLUŞTURUCU VE DİĞER OLAYLAR
 // ==========================================
+
+function generateCalendar() {
+    calendarGrid.innerHTML = '';
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); 
+    
+    const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    calendarMonthName.textContent = `${monthNames[month]} ${year}`;
+
+    const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    dayNames.forEach(day => {
+        const el = document.createElement('div');
+        el.className = 'calendar-day-header';
+        el.textContent = day;
+        calendarGrid.appendChild(el);
+    });
+
+    let firstDay = new Date(year, month, 1).getDay();
+    firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const workoutDays = dbData.stats.workoutDays || [];
+
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'calendar-day empty';
+        calendarGrid.appendChild(emptyDiv);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+        dayDiv.textContent = i;
+        
+        if (workoutDays.includes(i)) {
+            dayDiv.classList.add('workout-done');
+        }
+        calendarGrid.appendChild(dayDiv);
+    }
+}
+
+btnToggleCalendar.addEventListener('click', () => {
+    if (calendarContainer.style.display === 'none') {
+        calendarContainer.style.display = 'block';
+        btnToggleCalendar.textContent = "Takvimi Gizle";
+        generateCalendar();
+    } else {
+        calendarContainer.style.display = 'none';
+        btnToggleCalendar.textContent = "📅 Takvimi Göster";
+    }
+});
 
 btnNext.addEventListener('click', () => {
     if (currentIndex < activeExercises.length - 1) {
-        // İleri butonuna manuel basılırsa molayı es geçip direkt sonrakine atlar
         currentIndex++;
         renderExercise();
     }
@@ -545,7 +613,6 @@ btnRestart.addEventListener('click', () => {
     progressContainer.style.display = 'block'; 
     card.style.display = 'block';
     navButtons.style.display = 'flex';
-    
     switchScreen(appContainer, programSelectionScreen);
 });
 
@@ -563,6 +630,8 @@ btnStats.addEventListener('click', () => {
         statLeveledUpList.innerHTML = '<li>Henüz seviye atlayan hareket yok.</li>';
     }
     
+    calendarContainer.style.display = 'none'; 
+    btnToggleCalendar.textContent = "📅 Takvimi Göster";
     statsModal.style.display = 'flex';
 });
 

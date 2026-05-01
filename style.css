@@ -346,3 +346,42 @@ body {
 #program-selection-screen h2 {
     margin-top: 30px; 
 }
+
+/* YENİ: Takvim Tasarımı ve Mor Vurgu */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #888;
+    padding-bottom: 5px;
+    font-weight: bold;
+}
+
+.calendar-day {
+    background-color: #2c3e50;
+    color: #e0e0e0;
+    border-radius: 6px;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.calendar-day.empty {
+    background-color: transparent;
+}
+
+/* Spor yapılan gün (Açık Mor) */
+.calendar-day.workout-done {
+    background-color: #b39ddb; /* İstediğin tatlı açık mor */
+    color: #121212;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(179, 157, 219, 0.4);
+    transform: scale(1.05);
+}

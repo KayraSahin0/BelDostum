@@ -13,6 +13,8 @@
     <!-- İstatistik Butonu (Sol Üst) -->
     <button id="btn-stats" class="btn-floating" style="display: none;">📊 İstatistikler</button>
 
+    
+
     <!-- Yükleme Ekranı -->
     <div id="loading-screen" class="loading-overlay">
         <h2>Veriler Yükleniyor...</h2>
@@ -99,7 +101,7 @@
     <!-- 1. İstatistik Modalı -->
     <div id="stats-modal" class="modal-overlay">
         <div class="modal-content card">
-            <h2>📊 İstatistiklerin</h2>
+            <h2 style="margin-bottom: 20px;">📊 İstatistiklerin</h2>
             <div class="target-box" style="margin-bottom: 15px;">
                 <span>Bu Ay Yapılan Antrenman:</span>
                 <strong id="stat-month-count">0</strong>
@@ -109,6 +111,13 @@
                 <ul id="stat-leveled-up-list">
                     <li>Henüz seviye atlayan hareket yok.</li>
                 </ul>
+            </div>
+            <!-- Takvim Butonu ve Alanı -->
+            <button id="btn-toggle-calendar" class="btn btn-primary" style="margin-top: 15px; width: 100%;">📅 Takvimi Göster</button>
+            
+            <div id="calendar-container" style="display: none; margin-top: 15px;">
+                <h3 id="calendar-month-name" style="text-align: center; color: #b39ddb; margin-bottom: 10px;">Mayıs 2026</h3>
+                <div class="calendar-grid" id="calendar-grid"></div>
             </div>
             <button id="btn-close-stats" class="btn btn-secondary" style="margin-top: 20px; width: 100%;">Kapat</button>
         </div>
