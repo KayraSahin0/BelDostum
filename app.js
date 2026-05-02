@@ -23,7 +23,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // Veritabanı Döküman Referansı (Global veri alanı)
-const userDocRef = doc(db, "workoutApp", "userData");
+const userDocRef = null;
 
 // Bellekte tutacağımız güncel veriler
 let dbData = {
@@ -173,12 +173,22 @@ btnLogin.addEventListener('click', () => {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         loginScreen.style.display = 'none';
+        
+        // Artık veritabanı yolu sabit değil, giriş yapan kullanıcının benzersiz ID'si (user.uid)
+        userDocRef = doc(db, "workoutApp", user.uid);
+        
         loadDataFromFirebase();
     } else {
         loadingScreen.style.display = 'none';
         appContainer.style.display = 'none';
         programSelectionScreen.style.display = 'none';
         loginScreen.style.display = 'flex';
+        
+        // Çıkış yapıldığında bellekteki veriyi sıfırla ki başkasının ekranında görünmesin
+        dbData = {
+            progress: {}, 
+            stats: { workoutsThisMonth: 0, currentMonth: "", leveledUpExercises: [], workoutDays: [] }
+        };
     }
 });
 
