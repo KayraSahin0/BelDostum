@@ -23,7 +23,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // Veritabanı Döküman Referansı (Global veri alanı)
-const userDocRef = null;
+let userDocRef = null;
 
 // Bellekte tutacağımız güncel veriler
 let dbData = {
