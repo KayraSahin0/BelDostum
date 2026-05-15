@@ -492,6 +492,32 @@ function renderExercise() {
     btnNext.disabled = currentIndex === activeExercises.length - 1;
 }
 
+// Tarayıcı üzerinden "Bip" sesi üreten fonksiyon
+function playBeep(freq = 600, duration = 0.15) {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return; // Eski tarayıcı koruması
+        
+        const audioCtx = new AudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine'; // Temiz bir sinyal sesi
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime); // Frekans (Kalınlık/İncelik)
+        
+        // Sesi hafifçe kısarak bitir (patlama yapmasın)
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime); // Ses seviyesi (0.2 ideal)
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+        console.log("Ses oynatılamadı:", e);
+    }
+}
+
 function setupTimerUI(duration) {
     actionArea.innerHTML = `
         <div id="timer-display" class="timer-display">${duration}</div>
@@ -522,16 +548,21 @@ function setupTimerUI(duration) {
             const percent = (timeLeft / duration) * 100;
             timerFill.style.width = `${percent}%`;
 
+            // SON 3 SANİYE: Hem kalp atışı animasyonu hem kısa bip
             if (timeLeft <= 3 && timeLeft > 0) {
                 timerDisplay.classList.add('pulse-animation');
+                playBeep(600, 0.15); // Normal uyarı sesi
             }
             
+            // SÜRE BİTTİĞİNDE
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerDisplay.classList.remove('pulse-animation'); 
                 timerDisplay.textContent = "Bitti!";
                 timerTrackContainer.style.display = "none"; 
                 btnComplete.style.display = "block"; 
+                
+                playBeep(1000, 0.4); // Bitiş için daha tiz ve uzun bir bip!
             }
         }, 1000); 
     });
@@ -544,6 +575,20 @@ function setupRepUI() {
         <button id="btn-complete" class="btn btn-action">Seti Bitirdim</button>
     `;
     document.getElementById('btn-complete').addEventListener('click', handleCompletion);
+    timerInterval = setInterval(() => {
+            restTime--;
+            restTimerDisplay.textContent = restTime;
+            
+            // Mola bitimine son 3 saniye kala uyarı sesi
+            if (restTime <= 3 && restTime > 0) {
+                playBeep(600, 0.15);
+            }
+            
+            if (restTime <= 0) {
+                playBeep(1000, 0.4); // Molanın bittiğini haber veren uzun tiz ses
+                endRest();
+            }
+        }, 1000);
 }
 
 
